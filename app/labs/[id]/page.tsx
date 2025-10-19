@@ -3,11 +3,37 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { Share2, Heart, MessageSquare, Users, ChevronRight, Clock, CheckCircle2, CircleDollarSign, BookOpen, Video } from 'lucide-react'
+import { Share2, MessageSquare, Users, ChevronRight, CircleDollarSign, BookOpen, Video } from 'lucide-react'
+import { getLabById, labs as allLabs } from "@/lib/labs"
+import type { Metadata } from 'next'
 
-export default function LabProfile({ params }: { params: { id: string } }) {
-  // In a real app, we would fetch the lab data based on the ID
-  const lab = labs.find(l => l.id === params.id) || labs[0]
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const lab = getLabById(id) || allLabs[0]
+  const title = `${lab.name} — AWARE`
+  const description = lab.description
+  const images = lab.image ? [lab.image] : ['/placeholder.svg']
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images,
+      type: 'website'
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images
+    }
+  }
+}
+
+export default async function LabProfile({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const lab = getLabById(id) || allLabs[0]
 
   return (
     <div className="container py-8 md:py-12">
@@ -46,10 +72,6 @@ export default function LabProfile({ params }: { params: { id: string } }) {
             
             <div className="flex items-center gap-4 pt-2">
               <div className="flex items-center gap-1">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{lab.supporters} supporters</span>
-              </div>
-              <div className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">{lab.updates} updates</span>
               </div>
@@ -72,10 +94,6 @@ export default function LabProfile({ params }: { params: { id: string } }) {
             </Button>
             
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1">
-                <Heart className="mr-2 h-4 w-4" />
-                Follow
-              </Button>
               <Button variant="outline" size="icon">
                 <Share2 className="h-4 w-4" />
               </Button>
@@ -88,23 +106,22 @@ export default function LabProfile({ params }: { params: { id: string } }) {
       <div className="mt-8 grid gap-8 lg:grid-cols-[2fr_1fr]">
         <div>
           <Tabs defaultValue="about">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="about">About</TabsTrigger>
               <TabsTrigger value="updates">Updates</TabsTrigger>
-              <TabsTrigger value="milestones">Milestones</TabsTrigger>
               <TabsTrigger value="team">Team</TabsTrigger>
             </TabsList>
             <TabsContent value="about" className="space-y-6 pt-6">
               <div>
                 <h2 className="text-xl font-bold">Research Focus</h2>
                 <p className="mt-2 text-muted-foreground">
-                  {lab.longDescription}
+                  {lab.longDescription || lab.description}
                 </p>
               </div>
               <div>
                 <h2 className="text-xl font-bold">Why This Matters</h2>
                 <p className="mt-2 text-muted-foreground">
-                  {lab.impact}
+                  {lab.impact || "This research addresses an important unmet medical need with potential for real-world impact."}
                 </p>
               </div>
               <div>
@@ -157,44 +174,9 @@ export default function LabProfile({ params }: { params: { id: string } }) {
                 </div>
               )}
             </TabsContent>
-            <TabsContent value="milestones" className="space-y-6 pt-6">
-              <div className="space-y-4">
-                {lab.milestones.map((milestone, i) => (
-                  <div key={i} className="rounded-lg border p-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`mt-1 h-6 w-6 rounded-full flex items-center justify-center ${milestone.completed ? 'bg-green-100' : 'bg-gray-100'}`}>
-                        {milestone.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Clock className="h-4 w-4 text-gray-500" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium">{milestone.title}</h3>
-                          <span className={`text-sm font-medium ${milestone.completed ? 'text-green-600' : 'text-rose-600'}`}>
-                            ${milestone.amount.toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {milestone.description}
-                        </p>
-                        {!milestone.completed && (
-                          <div className="mt-3">
-                            <Button size="sm" className="bg-rose-600 hover:bg-rose-700">
-                              Fund This Milestone
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
             <TabsContent value="team" className="space-y-6 pt-6">
               <div className="grid gap-6 sm:grid-cols-2">
-                {lab.team.map((member, i) => (
+                {(lab.team ?? []).map((member, i) => (
                   <div key={i} className="flex gap-4">
                     <div className="h-16 w-16 rounded-full overflow-hidden">
                       <Image
@@ -223,17 +205,20 @@ export default function LabProfile({ params }: { params: { id: string } }) {
           <div className="rounded-lg border bg-card p-6">
             <h3 className="font-medium">Transparent Budgeting</h3>
             <div className="mt-4 space-y-3">
-              {lab.budget.map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm">{item.category}</span>
-                  <span className="text-sm font-medium">{item.percentage}%</span>
-                </div>
-              ))}
+              {(lab.budget ?? []).map((item, i) => {
+                const total = (lab.budget ?? []).reduce((sum, b) => sum + b.amount, 0)
+                const percentage = total > 0 ? Math.round((item.amount / total) * 100) : 0
+                return (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="text-sm">{item.category}</span>
+                    <span className="text-sm font-medium">{percentage}%</span>
+                  </div>
+                )
+              })}
               <div className="h-4 w-full overflow-hidden rounded-full bg-gray-100 mt-2">
-                {lab.budget.map((item, i) => {
-                  // Calculate the width and offset for this segment
-                  const width = item.percentage
-                  const offset = lab.budget.slice(0, i).reduce((sum, b) => sum + b.percentage, 0)
+                {(lab.budget ?? []).map((item, i) => {
+                  const total = (lab.budget ?? []).reduce((sum, b) => sum + b.amount, 0)
+                  const width = total > 0 ? Math.round((item.amount / total) * 100) : 0
                   
                   return (
                     <div
@@ -250,193 +235,22 @@ export default function LabProfile({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-card p-6">
-            <h3 className="font-medium">Student Explorer</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Subscribe to this lab to receive weekly micro-lessons and Q&As with scientists.
-            </p>
-            <div className="mt-4">
-              <Button className="w-full" variant="outline">
-                <BookOpen className="mr-2 h-4 w-4" />
-                Subscribe as Student
-              </Button>
-            </div>
-          </div>
 
           <div className="rounded-lg border bg-card p-6">
             <h3 className="font-medium">Community Challenge</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               If we reach 100 donors this month, our lab will host a virtual tour and Q&A session!
             </p>
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>{lab.supporters} supporters</span>
-                <span className="font-medium">100 goal</span>
-              </div>
-              <Progress value={(lab.supporters / 100) * 100} className="h-2" />
-            </div>
           </div>
         </div>
       </div>
     </div>
   )
 }
-
 const budgetColors = [
   "#f43f5e", // rose-500
   "#ec4899", // pink-500
   "#d946ef", // fuchsia-500
   "#a855f7", // purple-500
   "#8b5cf6", // violet-500
-]
-
-const labs = [
-  {
-    id: "neuro-lab",
-    name: "Neurodegeneration Research Lab",
-    description: "Investigating novel treatments for Alzheimer's disease through targeted protein therapy.",
-    longDescription: "Our lab focuses on understanding the molecular mechanisms behind neurodegenerative diseases, particularly Alzheimer's. We're investigating how misfolded proteins contribute to neuronal death and developing targeted therapies to prevent or reverse this process. Our innovative approach combines computational modeling with experimental validation to identify potential drug targets.",
-    impact: "Alzheimer's disease affects over 6 million Americans and is projected to reach nearly 13 million by 2050. Current treatments only address symptoms without slowing disease progression. Our research aims to develop therapies that target the root causes of neurodegeneration, potentially stopping or reversing the disease process.",
-    institution: "Yale University",
-    image: "/placeholder.svg?height=400&width=600",
-    progress: 65,
-    raised: 32500,
-    goal: 50000,
-    supporters: 128,
-    updates: 7,
-    milestones: [
-      {
-        title: "Purchase specialized antibodies",
-        description: "These antibodies are essential for detecting specific protein conformations in our experiments.",
-        amount: 5000,
-        completed: true
-      },
-      {
-        title: "Fund graduate student research",
-        description: "Support a graduate student researcher for one semester to advance our protein analysis work.",
-        amount: 15000,
-        completed: true
-      },
-      {
-        title: "Upgrade imaging equipment",
-        description: "Enhance our microscopy capabilities to better visualize protein aggregates in neural tissue.",
-        amount: 12500,
-        completed: true
-      },
-      {
-        title: "Pilot study with novel compound",
-        description: "Test our most promising compound in cellular models of neurodegeneration.",
-        amount: 10000,
-        completed: false
-      },
-      {
-        title: "Conference presentation",
-        description: "Present our findings at the International Neurodegeneration Conference.",
-        amount: 7500,
-        completed: false
-      }
-    ],
-    team: [
-      {
-        name: "Dr. Sarah Chen",
-        role: "Principal Investigator",
-        bio: "Neuroscientist with 15 years of experience in protein misfolding disorders."
-      },
-      {
-        name: "Dr. Michael Rodriguez",
-        role: "Postdoctoral Fellow",
-        bio: "Specializes in computational modeling of protein interactions."
-      },
-      {
-        name: "Jennifer Kim",
-        role: "Graduate Student",
-        bio: "Researching novel biomarkers for early Alzheimer's detection."
-      },
-      {
-        name: "David Patel",
-        role: "Lab Technician",
-        bio: "Expert in cellular imaging and tissue culture techniques."
-      }
-    ],
-    budget: [
-      { category: "Research Supplies", percentage: 45 },
-      { category: "Student Support", percentage: 30 },
-      { category: "Equipment", percentage: 15 },
-      { category: "Publication Costs", percentage: 10 }
-    ]
-  },
-  {
-    id: "cancer-research",
-    name: "Precision Oncology Lab",
-    description: "Developing personalized cancer treatments based on genetic profiling and immunotherapy.",
-    longDescription: "Our laboratory is at the forefront of precision oncology, developing targeted therapies based on individual genetic profiles. We use cutting-edge genomic sequencing and bioinformatics to identify specific mutations driving cancer growth, then design treatments that precisely target these alterations while sparing healthy cells.",
-    impact: "Cancer remains one of the leading causes of death worldwide. While treatments have improved, many patients still face poor outcomes due to one-size-fits-all approaches. Our precision medicine strategy aims to dramatically improve efficacy while reducing side effects by tailoring treatments to each patient's unique cancer profile.",
-    institution: "Stanford Medical",
-    image: "/placeholder.svg?height=400&width=600",
-    progress: 42,
-    raised: 21000,
-    goal: 50000,
-    supporters: 94,
-    updates: 5,
-    milestones: [
-      {
-        title: "Genomic sequencing equipment",
-        description: "Purchase next-generation sequencing supplies for tumor analysis.",
-        amount: 12000,
-        completed: true
-      },
-      {
-        title: "Bioinformatics software licenses",
-        description: "Access to specialized software for analyzing genetic mutations.",
-        amount: 8000,
-        completed: true
-      },
-      {
-        title: "Patient sample collection",
-        description: "Establish a biobank of diverse cancer samples for testing.",
-        amount: 15000,
-        completed: false
-      },
-      {
-        title: "Drug screening platform",
-        description: "Test candidate compounds against patient-derived cancer cells.",
-        amount: 10000,
-        completed: false
-      },
-      {
-        title: "Clinical trial preparation",
-        description: "Prepare regulatory documentation for initial clinical testing.",
-        amount: 5000,
-        completed: false
-      }
-    ],
-    team: [
-      {
-        name: "Dr. James Wilson",
-        role: "Principal Investigator",
-        bio: "Oncologist specializing in genomic medicine and targeted therapies."
-      },
-      {
-        name: "Dr. Aisha Johnson",
-        role: "Clinical Research Director",
-        bio: "Translates laboratory findings into clinical applications."
-      },
-      {
-        name: "Robert Chang",
-        role: "Bioinformatics Specialist",
-        bio: "Develops algorithms to identify actionable genetic mutations."
-      },
-      {
-        name: "Maria Gonzalez",
-        role: "Graduate Researcher",
-        bio: "Investigating immune response to personalized cancer vaccines."
-      }
-    ],
-    budget: [
-      { category: "Genomic Analysis", percentage: 35 },
-      { category: "Lab Supplies", percentage: 25 },
-      { category: "Personnel", percentage: 30 },
-      { category: "Clinical Coordination", percentage: 10 }
-    ]
-  }
 ]

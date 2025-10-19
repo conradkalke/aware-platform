@@ -1,6 +1,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+export const metadata = {
+  title: 'About — AWARE',
+  description: 'AWARE connects supporters directly with medical research labs through transparent funding and storytelling.'
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Users, Target, Heart, BookOpen, Award, Globe, Shield, TrendingUp } from 'lucide-react'
@@ -24,10 +28,10 @@ export default function AboutPage() {
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-rose-600">Our Mission</h2>
             <p className="text-lg text-muted-foreground">
-              AWARE exists to bridge the gap between medical research and public support. We believe that every breakthrough, no matter how small, deserves a chance to flourish.
+              AWARE connects medical researchers with people who want to support their work. We make it easy for anyone to donate directly to research projects they care about.
             </p>
             <p className="text-muted-foreground">
-              By connecting labs directly with donors, students, and the public, we're creating a new model for research funding that's transparent, engaging, and effective.
+              Instead of complex funding systems, we create direct connections between researchers and supporters, making research funding simple and transparent.
             </p>
             <div className="flex gap-4">
               <Button asChild className="bg-rose-600 hover:bg-rose-700">
@@ -37,14 +41,6 @@ export default function AboutPage() {
                 <Link href="/contact">Contact Us</Link>
               </Button>
             </div>
-          </div>
-          <div className="relative aspect-video overflow-hidden rounded-lg">
-            <Image
-              src="/placeholder.svg?height=400&width=600"
-              alt="Medical researchers collaborating"
-              fill
-              className="object-cover"
-            />
           </div>
         </div>
       </section>
@@ -88,7 +84,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground text-center">
-                We believe in making science accessible to everyone, from students to lifelong learners.
+                We believe in making science accessible to everyone.
               </p>
             </CardContent>
           </Card>
@@ -108,30 +104,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Impact Section */}
-      <section className="mb-16">
-        <div className="rounded-lg bg-rose-50 p-8">
-          <h2 className="text-3xl font-bold text-center mb-8 text-rose-600">Our Impact</h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-rose-600 mb-2">$2.3M</div>
-              <p className="text-muted-foreground">Raised for research</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-rose-600 mb-2">156</div>
-              <p className="text-muted-foreground">Labs supported</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-rose-600 mb-2">12,450</div>
-              <p className="text-muted-foreground">Active supporters</p>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Team Section */}
       <section className="mb-16">
-        <h2 className="text-3xl font-bold text-center mb-12 text-rose-600">Our Team</h2>
+        <h2 className="text-3xl font-bold text-center mb-12 text-rose-600">Founder</h2>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {team.map((member) => (
             <Card key={member.name}>
@@ -161,7 +138,7 @@ export default function AboutPage() {
       {/* How It Works */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-center mb-12 text-rose-600">How It Works</h2>
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2">
           <div className="text-center space-y-4">
             <div className="mx-auto rounded-full bg-rose-100 p-4 w-fit">
               <Users className="h-8 w-8 text-rose-600" />
@@ -180,15 +157,7 @@ export default function AboutPage() {
               Find causes you care about, follow progress, and make transparent donations with real impact.
             </p>
           </div>
-          <div className="text-center space-y-4">
-            <div className="mx-auto rounded-full bg-rose-100 p-4 w-fit">
-              <BookOpen className="h-8 w-8 text-rose-600" />
-            </div>
-            <h3 className="text-xl font-semibold">For Students</h3>
-            <p className="text-muted-foreground">
-              Learn directly from researchers, get career insights, and become part of the scientific community.
-            </p>
-          </div>
+          
         </div>
       </section>
 
@@ -213,33 +182,8 @@ export default function AboutPage() {
 
 const team = [
   {
-    name: "Dr. Sarah Johnson",
-    role: "CEO & Co-Founder",
-    bio: "Former research scientist with 15 years in academic medicine. Passionate about democratizing research funding."
-  },
-  {
-    name: "Michael Chen",
-    role: "CTO & Co-Founder",
-    bio: "Tech entrepreneur with expertise in building platforms that connect communities and drive impact."
-  },
-  {
-    name: "Dr. Emily Rodriguez",
-    role: "Head of Research Relations",
-    bio: "Ph.D. in biomedical sciences with experience helping labs navigate funding challenges and public engagement."
-  },
-  {
-    name: "David Kim",
-    role: "Head of Product",
-    bio: "Product leader focused on creating intuitive experiences that make science accessible to everyone."
-  },
-  {
-    name: "Lisa Thompson",
-    role: "Head of Community",
-    bio: "Community builder with experience growing engaged audiences around meaningful causes and education."
-  },
-  {
-    name: "Dr. James Wilson",
-    role: "Scientific Advisor",
-    bio: "Distinguished professor and researcher who provides guidance on scientific integrity and research standards."
+    name: "Conrad Kalke",
+    role: "Founder & CEO",
+    bio: "After seeing vital medical research slowed by funding shortages, I set out to help close the gap. My goal is to connect people directly with the scientists working to save lives."
   }
 ] 

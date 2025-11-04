@@ -145,6 +145,19 @@ export function ContactPageClient() {
                     {error}
                   </div>
                 )}
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-md">
+                  <p className="text-sm text-rose-800">
+                    <strong>For Labs:</strong> If you want to sign up, please fill out the{' '}
+                    <a 
+                      href="/AWARE_Lab_Registration_Form.docx" 
+                      download
+                      className="underline font-medium hover:text-rose-900"
+                    >
+                      AWARE Lab Registration Document
+                    </a>
+                    .
+                  </p>
+                </div>
                 <Button 
                   type="submit" 
                   className="w-full bg-rose-600 hover:bg-rose-700"

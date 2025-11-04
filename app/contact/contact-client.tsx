@@ -153,7 +153,14 @@ export function ContactPageClient() {
                       download
                       className="underline font-medium hover:text-rose-900"
                     >
-                      AWARE Lab Registration Document
+                      "AWARE Lab Registration Document"
+                    </a>
+                    {' '}and email it to{' '}
+                    <a 
+                      href="mailto:conradjulian18@gmail.com"
+                      className="underline font-medium hover:text-rose-900"
+                    >
+                      conradjulian18@gmail.com
                     </a>
                     .
                   </p>

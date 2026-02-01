@@ -138,7 +138,30 @@ export default async function LabProfile({ params }: { params: Promise<{ id: str
               </div>
             </TabsContent>
             <TabsContent value="updates" className="space-y-6 pt-6">
-              {lab.updates > 0 && (
+              {lab.updatesList && lab.updatesList.length > 0 ? (
+                <div className="space-y-6">
+                  {lab.updatesList.map((update, i) => (
+                    <div key={`${update.date}-${i}`} className="rounded-lg border p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center">
+                          {i % 2 === 0 ? (
+                            <Video className="h-5 w-5 text-rose-600" />
+                          ) : (
+                            <BookOpen className="h-5 w-5 text-rose-600" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{update.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(update.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-muted-foreground">{update.summary}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : lab.updates > 0 ? (
                 <div className="space-y-6">
                   {[...Array(lab.updates)].map((_, i) => (
                     <div key={i} className="rounded-lg border p-4">
@@ -160,7 +183,7 @@ export default async function LabProfile({ params }: { params: Promise<{ id: str
                         </div>
                       </div>
                       <p className="mt-3 text-muted-foreground">
-                        {i % 2 === 0 
+                        {i % 2 === 0
                           ? "We've just uploaded a new video showing our latest experimental results. Check it out to see how your support is making a difference!"
                           : "We're excited to share that we've made significant progress in our research. Our latest findings suggest a promising new direction for treatment."}
                       </p>
@@ -172,7 +195,7 @@ export default async function LabProfile({ params }: { params: Promise<{ id: str
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null}
             </TabsContent>
             <TabsContent value="team" className="space-y-6 pt-6">
               <div className="grid gap-6 sm:grid-cols-2">

@@ -6,6 +6,11 @@ export interface Lab {
   name: string
   description: string
   longDescription?: string
+  updatesList?: Array<{
+    date: string
+    title: string
+    summary: string
+  }>
   institution: string
   image?: string
   progress: number
@@ -28,100 +33,57 @@ export interface Lab {
 
 export const labs: Lab[] = [
   {
-    id: "neuro-lab",
-    name: "Neuroplasticity Research Lab",
-    description: "Investigating brain adaptation mechanisms in neurological disorders",
-    longDescription: "Our lab focuses on understanding how the brain adapts and reorganizes itself following injury or disease. We use cutting-edge imaging techniques and behavioral assessments to study neuroplasticity in patients with stroke, traumatic brain injury, and neurodegenerative diseases.",
-    institution: "University of California, San Francisco",
-    image: "/lab-scientist-1.jpg",
-    progress: 0,
-    raised: 0,
-    goal: 500000,
-    updates: 23,
-    impact: "Our research could lead to new rehabilitation strategies that help patients recover lost brain function and improve quality of life for millions affected by neurological conditions.",
-    team: [
+    id: "verhaak-brain-cancer",
+    name: "Verhaak Brain Cancer Lab",
+    description: "Studying brain tumors, therapy resistance, and extrachromosomal DNA amplifications",
+    longDescription: "We are a cancer biology lab focused on brain tumors and extrachromosomal oncogene DNA amplification. We study tumor evolution and therapy resistance using high-throughput sequencing, computational analysis, and functional studies.",
+    updatesList: [
       {
-        name: "Dr. Sarah Chen",
-        role: "Principal Investigator",
-        bio: "Dr. Chen is a neurologist with over 15 years of experience in neuroplasticity research. She has published over 50 peer-reviewed articles and received multiple NIH grants.",
-        image: "/placeholder-user.jpg"
+        date: "2025-05-14",
+        title: "Refining glioblastoma cell states",
+        summary: "A multi-lab consortium used single-cell sequencing across many patient tumors to map glioblastoma cell types and how they change under treatment."
       },
       {
-        name: "Dr. Michael Rodriguez",
-        role: "Postdoctoral Fellow",
-        bio: "Dr. Rodriguez specializes in functional MRI analysis and has developed novel techniques for tracking brain reorganization patterns.",
+        date: "2024-10-07",
+        title: "ecDNA amplifications drive progression",
+        summary: "A new Nature Genetics paper shows how extrachromosomal DNA amplifications can fuel metastasis and tumor growth."
+      }
+    ],
+    institution: "Yale University, New Haven",
+    image: "/yalefree.jpg",
+    progress: 0,
+    raised: 0,
+    goal: 10000,
+    updates: 2,
+    impact: "Our research aims to explain how brain tumors evolve and resist therapy, enabling more durable, targeted treatments.",
+    team: [
+      {
+        name: "Roel Verhaak",
+        role: "Principal Investigator",
+        bio: "Roel Verhaak leads the lab's research on brain tumors, tumor evolution, and therapy resistance.",
         image: "/placeholder-user.jpg"
       }
     ],
     budget: [
       {
-        category: "Equipment",
-        amount: 150000,
-        description: "High-field MRI scanner upgrades and specialized neuroimaging software"
+        category: "Sequencing",
+        amount: 4000,
+        description: "Single-cell and bulk sequencing for tumor profiling"
+      },
+      {
+        category: "Computational Analysis",
+        amount: 2500,
+        description: "Cloud compute, storage, and analysis tooling"
       },
       {
         category: "Personnel",
-        amount: 200000,
-        description: "Graduate student stipends and research technician salaries"
+        amount: 2500,
+        description: "Research support and technician time"
       },
       {
         category: "Supplies",
-        amount: 100000,
-        description: "Research reagents, participant compensation, and data storage"
-      },
-      {
-        category: "Travel",
-        amount: 50000,
-        description: "Conference presentations and collaboration meetings"
-      }
-        ]
-  },
-  {
-    id: "cancer-research",
-    name: "Cancer Immunotherapy Lab",
-    description: "Developing personalized cancer treatments using immune system engineering",
-    longDescription: "We're pioneering new approaches to cancer treatment by engineering the body's own immune system to recognize and destroy cancer cells. Our work focuses on CAR-T cell therapy and checkpoint inhibitors for various cancer types.",
-    institution: "Memorial Sloan Kettering Cancer Center",
-    image: "/lab-scientist-2.jpg",
-    progress: 0,
-    raised: 0,
-    goal: 500000,
-    updates: 18,
-    impact: "Our immunotherapy research could revolutionize cancer treatment, offering hope for patients with previously untreatable cancers and reducing the side effects of traditional chemotherapy.",
-    team: [
-      {
-        name: "Dr. Emily Watson",
-        role: "Principal Investigator",
-        bio: "Dr. Watson is a leading expert in cancer immunology with over 20 years of experience. She has led several clinical trials and holds multiple patents in immunotherapy.",
-        image: "/placeholder-user.jpg"
-      },
-      {
-        name: "Dr. James Park",
-        role: "Research Scientist",
-        bio: "Dr. Park specializes in T-cell engineering and has developed novel methods for enhancing CAR-T cell persistence and efficacy.",
-        image: "/placeholder-user.jpg"
-      }
-    ],
-    budget: [
-      {
-        category: "Laboratory Equipment",
-        amount: 180000,
-        description: "Flow cytometers, cell culture equipment, and specialized bioreactors"
-      },
-      {
-        category: "Personnel",
-        amount: 220000,
-        description: "Research scientists, lab technicians, and clinical coordinators"
-      },
-      {
-        category: "Supplies",
-        amount: 80000,
-        description: "Cell culture media, antibodies, and laboratory consumables"
-      },
-      {
-        category: "Clinical Trials",
-        amount: 20000,
-        description: "Patient recruitment and trial management costs"
+        amount: 1000,
+        description: "Reagents, tissue processing, and lab consumables"
       }
     ]
   }

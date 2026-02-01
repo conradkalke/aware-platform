@@ -17,7 +17,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-gray-50">
         <div className="container px-4 md:px-6">
-          <div className="grid gap-6">
+          <div className="grid gap-8 md:grid-cols-2 md:items-center">
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-rose-600">
@@ -38,6 +38,16 @@ export default function Home() {
                   </Link>
                 </Button>
               </div>
+            </div>
+            <div className="relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border bg-white shadow-sm">
+              <Image
+                src="/aware%20banner.jpg"
+                alt="AWARE banner"
+                width={1200}
+                height={800}
+                className="h-auto w-full object-cover"
+                priority
+              />
             </div>
           </div>
         </div>

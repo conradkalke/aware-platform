@@ -183,7 +183,7 @@ export default function AboutPage() {
 const team = [
   {
     name: "Conrad Kalke",
-    role: "Founder & CEO",
+    role: "Founder",
     bio: "After seeing vital medical research slowed by funding shortages, I set out to help close the gap. My goal is to connect people directly with the scientists working to save lives."
   }
 ] 

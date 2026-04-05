@@ -40,12 +40,7 @@ cd aware-platform
 npm install
 ```
 
-3. Set up environment variables:
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` with your actual values (or copy from `.env.example` if present):
+3. Set up environment variables by creating `.env.local`:
 ```
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
@@ -101,12 +96,7 @@ aware-platform/
 
 ### Adding New Labs
 
-Labs are centralized in `lib/labs.ts`.
-
-1. Open `lib/labs.ts`
-2. Add a new object to the exported `labs` array (ensure `id` is URL-safe)
-3. Optional: include `longDescription`, `impact`, `team`, and `budget` fields for richer lab pages
-4. The pages `'/labs'`, `'/labs/[id]'`, and `'/donate/[labId]'` will automatically reflect the new lab
+Labs are defined in `lib/labs.ts`. Edit that file to add or change lab entries.
 
 ### Styling
 

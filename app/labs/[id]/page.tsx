@@ -3,16 +3,18 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { Share2, MessageSquare, Users, ChevronRight, CircleDollarSign, BookOpen, Video } from 'lucide-react'
+import { Share2, MessageSquare, ChevronRight, BookOpen, Video } from 'lucide-react'
 import { getLabById, labs as allLabs } from "@/lib/labs"
 import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
   const lab = getLabById(id) || allLabs[0]
-  const title = `${lab.name} — AWARE`
+  const name = lab.name
   const description = lab.description
-  const images = lab.image ? [lab.image] : ['/placeholder.svg']
+  const image = lab.image
+  const title = `${name} — AWARE`
+  const images = image ? [image] : ['/placeholder.svg']
   return {
     title,
     description,

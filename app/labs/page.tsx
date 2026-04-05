@@ -1,5 +1,4 @@
 import { LabsPageClient } from "./labs-client"
-import { listLabs } from "@/lib/labs"
 
 export const metadata = {
   title: 'Explore Labs — AWARE',

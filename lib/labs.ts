@@ -17,6 +17,7 @@ export interface Lab {
   raised: number
   goal: number
   updates: number
+  supporters?: number
   impact?: string
   team?: Array<{
     name: string
@@ -55,6 +56,7 @@ export const labs: Lab[] = [
     raised: 0,
     goal: 10000,
     updates: 2,
+    supporters: 0,
     impact: "Our research aims to explain how brain tumors evolve and resist therapy, enabling more durable, targeted treatments.",
     team: [
       {

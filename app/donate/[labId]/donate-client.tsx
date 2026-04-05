@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -11,9 +11,32 @@ import { Textarea } from "@/components/ui/textarea"
 import { ChevronRight, CircleDollarSign, CheckCircle2 } from 'lucide-react'
 import { getLabById, labs as allLabs } from "@/lib/labs"
 
+type LabView = {
+  id: string
+  name: string
+  description: string
+  institution: string
+  image: string | null
+  progress: number
+  raised: number
+  goal: number
+}
+
 export function DonatePageClient({ labId }: { labId: string }) {
-  const lab = getLabById(labId) || allLabs[0]
-  
+  const lab = useMemo<LabView>(() => {
+    const l = getLabById(labId) || allLabs[0]
+    return {
+      id: l.id,
+      name: l.name,
+      description: l.description,
+      institution: l.institution,
+      image: l.image ?? null,
+      progress: l.progress,
+      raised: l.raised,
+      goal: l.goal,
+    }
+  }, [labId])
+
   const [donationAmount, setDonationAmount] = useState<string>("25")
   const [customAmount, setCustomAmount] = useState<string>("")
   const [note, setNote] = useState<string>("")

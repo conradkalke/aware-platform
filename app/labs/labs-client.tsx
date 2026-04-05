@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -8,9 +8,30 @@ import { Input } from "@/components/ui/input"
 import { Search, Filter } from 'lucide-react'
 import { listLabs } from "@/lib/labs"
 
+type LabView = {
+  id: string
+  name: string
+  description: string
+  institution: string
+  image: string | null
+  progress: number
+  raised: number
+  goal: number
+  updates: number
+  supporters: number
+}
+
 export function LabsPageClient() {
   const [searchTerm, setSearchTerm] = useState("")
-  const labs = listLabs()
+  const labs = useMemo<LabView[]>(
+    () =>
+      listLabs().map((lab) => ({
+        ...lab,
+        image: lab.image ?? null,
+        supporters: lab.supporters ?? 0,
+      })),
+    []
+  )
 
   const filteredLabs = labs.filter(lab =>
     lab.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

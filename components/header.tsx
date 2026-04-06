@@ -46,6 +46,31 @@ export default function Header() {
     setIsMenuOpen(false)
   }
 
+  const dashboardLinkClass =
+    "text-sm font-medium hover:text-rose-600 transition-colors"
+
+  const navigateToRoleDashboard = async () => {
+    setIsMenuOpen(false)
+    if (!hasSupabaseEnv() || !session?.user) {
+      router.push("/dashboard")
+      return
+    }
+    const supabase = createClient()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("user_type")
+      .eq("id", session.user.id)
+      .maybeSingle()
+    const t = profile?.user_type
+    if (t === "lab") {
+      router.push("/dashboard/lab")
+    } else if (t === "donor") {
+      router.push("/dashboard/donor")
+    } else {
+      router.push("/dashboard")
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -62,9 +87,13 @@ export default function Header() {
           </Link>
           {session ? (
             <>
-              <Link href="/dashboard" className="text-sm font-medium hover:text-rose-600 transition-colors">
+              <button
+                type="button"
+                className={`${dashboardLinkClass} bg-transparent p-0 border-0 cursor-pointer font-inherit`}
+                onClick={() => void navigateToRoleDashboard()}
+              >
                 Dashboard
-              </Link>
+              </button>
               <Button
                 type="button"
                 variant="outline"
@@ -115,13 +144,13 @@ export default function Header() {
               </Link>
               {session ? (
                 <>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-medium hover:text-rose-600 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
+                  <button
+                    type="button"
+                    className={`${dashboardLinkClass} bg-transparent p-0 border-0 cursor-pointer font-inherit text-left w-full`}
+                    onClick={() => void navigateToRoleDashboard()}
                   >
                     Dashboard
-                  </Link>
+                  </button>
                   <Button
                     type="button"
                     variant="outline"

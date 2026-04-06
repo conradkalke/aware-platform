@@ -1,23 +1,35 @@
-import Link from "next/link"
+import { redirect } from "next/navigation"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 
-export default function DashboardPage() {
-  return (
-    <div className="container py-8 md:py-12">
-      <h1 className="text-3xl font-bold tracking-tight text-rose-600 md:text-4xl">
-        Dashboard
-      </h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">
-        You&apos;re signed in. This is your AWARE dashboard.
-      </p>
-      <p className="mt-6 text-sm text-muted-foreground">
-        <Link href="/labs" className="text-rose-600 hover:underline">
-          Explore labs
-        </Link>
-        {" · "}
-        <Link href="/" className="text-rose-600 hover:underline">
-          Home
-        </Link>
-      </p>
-    </div>
-  )
+export default async function DashboardPage() {
+  let supabase
+  try {
+    supabase = await createServerSupabaseClient()
+  } catch {
+    redirect("/auth")
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect("/auth")
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("user_type")
+    .eq("id", user.id)
+    .maybeSingle()
+
+  const userType = profile?.user_type
+  if (userType === "lab") {
+    redirect("/dashboard/lab")
+  }
+  if (userType === "donor") {
+    redirect("/dashboard/donor")
+  }
+
+  redirect("/dashboard/donor")
 }

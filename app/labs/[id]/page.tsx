@@ -5,7 +5,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Share2, MessageSquare, ChevronRight, BookOpen, Video } from 'lucide-react'
 import { getLabById, labs as allLabs } from "@/lib/labs"
+import { LabSaveButton } from "@/components/lab-save-button"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { Metadata } from 'next'
+
+async function getLabUuidBySlug(slug: string): Promise<string | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { data } = await supabase
+      .from("labs")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle()
+    return data?.id ?? null
+  } catch {
+    return null
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -36,6 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function LabProfile({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const lab = getLabById(id) || allLabs[0]
+  const initialLabId = await getLabUuidBySlug(lab.id)
 
   return (
     <div className="container py-8 md:py-12">
@@ -96,6 +116,11 @@ export default async function LabProfile({ params }: { params: Promise<{ id: str
             </Button>
             
             <div className="flex gap-2">
+              <LabSaveButton
+                key={lab.id}
+                labSlug={lab.id}
+                initialLabId={initialLabId}
+              />
               <Button variant="outline" size="icon">
                 <Share2 className="h-4 w-4" />
               </Button>

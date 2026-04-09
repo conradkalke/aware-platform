@@ -1,34 +1,190 @@
 import Image from "next/image"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Share2, MessageSquare, ChevronRight, BookOpen, Video } from 'lucide-react'
-import { getLabById, labs as allLabs } from "@/lib/labs"
+import { getLabById, type Lab } from "@/lib/labs"
 import { LabSaveButton } from "@/components/lab-save-button"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import {
+  createServerSupabaseClientNoStore,
+} from "@/lib/supabase/server"
 import type { Metadata } from 'next'
 
-async function getLabUuidBySlug(slug: string): Promise<string | null> {
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
+type LabsRow = {
+  id: string
+  slug: string
+  name: string
+  institution: string | null
+  location: string | null
+  description: string | null
+  research_focus: string | null
+  why_it_matters: string | null
+  funding_goal: number | string | null
+  image_url: string | null
+  budget_sequencing: number | string | null
+  budget_computational: number | string | null
+  budget_personnel: number | string | null
+  budget_supplies: number | string | null
+}
+
+function budgetFromRow(row: LabsRow): Lab["budget"] {
+  const out: NonNullable<Lab["budget"]> = []
+  const push = (category: string, v: unknown) => {
+    const n = typeof v === "number" ? v : v != null ? Number(v) : NaN
+    if (Number.isFinite(n) && n > 0) {
+      out.push({ category, amount: n, description: "" })
+    }
+  }
+  push("Sequencing", row.budget_sequencing)
+  push("Computational Analysis", row.budget_computational)
+  push("Personnel", row.budget_personnel)
+  push("Supplies", row.budget_supplies)
+  return out.length ? out : undefined
+}
+
+async function loadLabPageData(
+  slug: string
+): Promise<{ lab: Lab; initialLabId: string | null } | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) return null
+  if (!url || !key) {
+    const staticLab = getLabById(slug)
+    if (!staticLab) return null
+    return { lab: staticLab, initialLabId: null }
+  }
+
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data } = await supabase
+    const supabase = await createServerSupabaseClientNoStore()
+
+    const { data: row, error: labError } = await supabase
       .from("labs")
-      .select("id")
+      .select(
+        [
+          "id",
+          "slug",
+          "name",
+          "institution",
+          "location",
+          "description",
+          "research_focus",
+          "why_it_matters",
+          "funding_goal",
+          "image_url",
+          "budget_sequencing",
+          "budget_computational",
+          "budget_personnel",
+          "budget_supplies",
+        ].join(", ")
+      )
       .eq("slug", slug)
       .maybeSingle()
-    return data?.id ?? null
+
+    if (labError || !row) return null
+
+    const r = row as unknown as LabsRow
+    const labUuid = r.id
+
+    const [donRes, updatesRes, teamRes] = await Promise.all([
+      supabase.from("donations").select("amount").eq("lab_id", labUuid),
+      supabase
+        .from("lab_updates")
+        .select("title, content, created_at")
+        .eq("lab_id", labUuid)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("team_members")
+        .select("name, title, bio")
+        .eq("lab_id", labUuid),
+    ])
+
+    const donationRows = donRes.data ?? []
+    const raised = donationRows.reduce(
+      (s, d: { amount: number | string }) => s + Number(d.amount),
+      0
+    )
+    const goalRaw = r.funding_goal != null ? Number(r.funding_goal) : 0
+    const goal = goalRaw > 0 ? goalRaw : 10000
+    const progress = Math.min((raised / goal) * 100, 100)
+
+    const updateRows = updatesRes.data ?? []
+    const updatesList =
+      updateRows.length > 0
+        ? updateRows.map(
+            (u: {
+              title: string
+              content: string
+              created_at: string
+            }) => ({
+              date: (u.created_at ?? "").split("T")[0] || "",
+              title: u.title,
+              summary: u.content,
+            })
+          )
+        : undefined
+
+    const teamRows = teamRes.data ?? []
+    const team =
+      teamRows.length > 0
+        ? teamRows.map(
+            (m: { name: string; title: string; bio: string | null }) => ({
+              name: m.name,
+              role: m.title,
+              bio: m.bio ?? "",
+            })
+          )
+        : undefined
+
+    const description =
+      (r.description && r.description.trim()) ||
+      (r.research_focus && r.research_focus.trim()) ||
+      ""
+    const longDescription =
+      (r.research_focus && r.research_focus.trim()) ||
+      (r.description && r.description.trim()) ||
+      undefined
+
+    const lab: Lab = {
+      id: r.slug,
+      name: r.name,
+      description,
+      longDescription,
+      institution:
+        (r.institution && r.institution.trim()) ||
+        (r.location && r.location.trim()) ||
+        "",
+      image: r.image_url?.trim() || "/placeholder.svg",
+      progress,
+      raised,
+      goal,
+      updates: updatesList?.length ?? 0,
+      updatesList,
+      impact: r.why_it_matters?.trim() || undefined,
+      team,
+      budget: budgetFromRow(r),
+    }
+
+    return { lab, initialLabId: labUuid }
   } catch {
     return null
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
   const { id } = await params
-  const lab = getLabById(id) || allLabs[0]
+  const data = await loadLabPageData(id)
+  if (!data) {
+    return { title: "Lab — AWARE" }
+  }
+  const { lab } = data
   const name = lab.name
   const description = lab.description
   const image = lab.image
@@ -52,10 +208,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 }
 
-export default async function LabProfile({ params }: { params: Promise<{ id: string }> }) {
+export default async function LabProfile({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = await params
-  const lab = getLabById(id) || allLabs[0]
-  const initialLabId = await getLabUuidBySlug(lab.id)
+  const loaded = await loadLabPageData(id)
+  if (!loaded) {
+    notFound()
+  }
+  const { lab, initialLabId } = loaded
 
   return (
     <div className="container py-8 md:py-12">

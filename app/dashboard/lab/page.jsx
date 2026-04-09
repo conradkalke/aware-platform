@@ -1,10 +1,13 @@
 "use client"
 
+// `export const dynamic` and `export const revalidate` are in `layout.jsx` (this
+// file is a Client Component; Next.js only allows those exports on Server Components / layouts).
+
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Microscope } from "lucide-react"
-import { createClient } from "@/lib/supabase"
+import { createClientNoStore } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -75,7 +78,7 @@ export default function LabDashboardPage() {
       return
     }
 
-    const supabase = createClient()
+    const supabase = createClientNoStore()
     const {
       data: { session },
     } = await supabase.auth.getSession()
@@ -210,7 +213,7 @@ export default function LabDashboardPage() {
 
   const handleLogout = async () => {
     if (!hasSupabaseEnv()) return
-    const supabase = createClient()
+    const supabase = createClientNoStore()
     await supabase.auth.signOut()
     router.push("/")
     router.refresh()
@@ -221,8 +224,8 @@ export default function LabDashboardPage() {
     if (!lab?.id) return
     setSavingProfile(true)
     setProfileMessage(null)
-    const supabase = createClient()
-    const { data, error } = await supabase
+    const supabase = createClientNoStore()
+    const { error } = await supabase
       .from("labs")
       .update({
         name: profileForm.name.trim(),
@@ -238,16 +241,15 @@ export default function LabDashboardPage() {
         budget_supplies: numOrNull(profileForm.budget_supplies),
       })
       .eq("id", lab.id)
-      .select()
-      .single()
 
     setSavingProfile(false)
     if (error) {
       setProfileMessage({ type: "error", text: error.message })
       return
     }
-    if (data) setLab((prev) => ({ ...prev, ...data }))
     setProfileMessage({ type: "ok", text: "Profile saved." })
+    router.refresh()
+    await loadDashboard()
   }
 
   const handlePostUpdate = async (e) => {
@@ -255,7 +257,7 @@ export default function LabDashboardPage() {
     if (!lab?.id || !updateTitle.trim() || !updateContent.trim()) return
     setPostingUpdate(true)
     setUpdatePosted(false)
-    const supabase = createClient()
+    const supabase = createClientNoStore()
     const { error } = await supabase.from("lab_updates").insert({
       lab_id: lab.id,
       title: updateTitle.trim(),
@@ -272,7 +274,7 @@ export default function LabDashboardPage() {
   }
 
   const handleDeleteMember = async (memberId) => {
-    const supabase = createClient()
+    const supabase = createClientNoStore()
     const { error } = await supabase
       .from("team_members")
       .delete()
@@ -288,7 +290,7 @@ export default function LabDashboardPage() {
     e.preventDefault()
     if (!lab?.id || !newMember.name.trim() || !newMember.title.trim()) return
     setAddingMember(true)
-    const supabase = createClient()
+    const supabase = createClientNoStore()
     const { data, error } = await supabase
       .from("team_members")
       .insert({
